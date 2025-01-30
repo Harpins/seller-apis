@@ -13,28 +13,33 @@ logger = logging.getLogger(__file__)
 
 def get_product_list(last_id, client_id, seller_token):
     """Получает список из не более 1000 товаров магазина Ozon.
-    
+
     Создает POST-запрос к Ozon Seller API методом `/v2/product/list` и возвращает содержимое ответа.
-    
+
     Note:
         Метод запроса https://api-seller.ozon.ru/v2/product/list устарел и будет отключен с 9 февраля 2025 года.
         Документация к новой версии метода по [ссылке](https://docs.ozon.ru/api/seller/#operation/ProductAPI_GetProductListv3)
 
     Args:
-        last_id (str): Идентификатор последнего значения на странице с товарами. 
+        last_id (str): Идентификатор последнего значения на странице с товарами.
         Используется для пагинации запросов.
         client_id (str): Идентификатор клиента (владельца магазина Ozon).
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        dict = {
-            "items" : list[dict] = {
-                    "offer_id": str - Идентификатор товара в системе продавца (артикул),
-                    "product_id": int - Идентификатор товара в системе Ozon,
-                } - Массив объектов, содержащих информацию о товарах,
+        dict: Содержимое ответа Ozon Seller API. 
+        
+    Examples:
+        dict1 = {
+            "items" : list - Список словарей следующего вида:
+                dict2 = {
+                        "offer_id": str - Идентификатор товара в системе продавца (артикул),
+                        "product_id": int - Идентификатор товара в системе Ozon,
+                    }
+                dict["items"] содержит не более 1000 объектов,
             "last_id": str - Идентификатор последнего значения на странице с товарами,
             "total": int - Всего товаров на странице магазина,
-        }: Содержимое ответа Ozon Seller API, dict["items"] включает не более 1000 объектов.
+        }
     """
     url = "https://api-seller.ozon.ru/v2/product/list"
     headers = {
@@ -56,7 +61,7 @@ def get_product_list(last_id, client_id, seller_token):
 
 def get_offer_ids(client_id, seller_token):
     """Получает список артикулов всех товаров магазина Ozon.
-    
+
     Проводит пагинацию данных магазина OZON с помощью функции `get_product_list()`.
 
     Args:
@@ -64,7 +69,7 @@ def get_offer_ids(client_id, seller_token):
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        list[str]: Список артикулов всех товаров магазина Ozon.
+        list: Список строковых артикулов всех товаров магазина Ozon.
     """
     last_id = ""
     product_list = []
@@ -83,7 +88,7 @@ def get_offer_ids(client_id, seller_token):
 
 def update_price(prices: list, client_id, seller_token):
     """Обновляет цены товаров в магазине Ozon.
-    
+
     Создает POST-запрос к Ozon Seller API методом `/v1/product/import/prices` и возвращает содержимое ответа.
 
     Args:
@@ -92,16 +97,17 @@ def update_price(prices: list, client_id, seller_token):
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        list[
-            dict = {
-            "result" : dict = {
-                    "errors": list[dict] - Массив ошибок, возникших при обработке запроса,
+        list: Массив объектов из ответа Ozon Seller API.
+        
+        Структура объектов массива:
+            dict1 = {
+            "result" : dict2 = {
+                    "errors": list - Массив ошибок, возникших при обработке запроса,
                     "offer_id": str - Идентификатор товара в системе продавца (артикул),
                     "product_id": int - Идентификатор товара в системе Ozon,
-                    "updated": bool - Успех обновления информации товара,
+                    "updated": bool - Успешность обновления информации о товаре,
                 },
-            }, 
-        ]: Массив объектов из ответа Ozon Seller API
+            }
     """
     url = "https://api-seller.ozon.ru/v1/product/import/prices"
     headers = {
@@ -116,9 +122,9 @@ def update_price(prices: list, client_id, seller_token):
 
 def update_stocks(stocks: list, client_id, seller_token):
     """Обновляет информацию об остатках товаров в магазине Ozon.
-    
+
     Создает POST-запрос к Ozon Seller API методом `/v1/product/import/stocks` и возвращает содержимое ответа.
-    
+
     Note:
         Метод запроса https://api-seller.ozon.ru/v1/product/import/stocks в будущем будет отключен.
         Рекомендовано переключиться на [следующий метод](https://docs.ozon.ru/api/seller/#operation/ProductAPI_ProductsStocksV2)
@@ -129,18 +135,19 @@ def update_stocks(stocks: list, client_id, seller_token):
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        list[
-            dict = {
-            "result" : dict = {
-                    "errors": list[dict] - Массив ошибок, возникших при обработке запроса,
+        list: Массив объектов из ответа Ozon Seller API.
+        
+        Структура объектов массива:
+            dict1 = {
+            "result" : dict2 = {
+                    "errors": list - Массив ошибок, возникших при обработке запроса,
                     "offer_id": str - Идентификатор товара в системе продавца (артикул),
                     "product_id": int - Идентификатор товара в системе Ozon,
-                    "updated": bool - Успех обновления информации товара,
+                    "updated": bool - Успешность обновления информации о товаре,
                 },
-            },
-        ]: Массив объектов из ответа Ozon Seller API
+            }
     """
-    
+
     url = "https://api-seller.ozon.ru/v1/product/import/stocks"
     headers = {
         "Client-Id": client_id,
@@ -154,15 +161,14 @@ def update_stocks(stocks: list, client_id, seller_token):
 
 def download_stock():
     """Парсит с сайта casio данные об остатках часов на складе.
-    
-    Скачивает .zip файл по приведенной ссылке. 
+
+    Скачивает .zip файл по приведенной ссылке.
     Извлекает из него в текущую папку .xls файл, читает его и преобразует содержимое в список словарей.
     Удаляет .xls файл после использования.
-    
+
     Returns:
-        list[dict]: Список словарей, где каждый словарь представляет одну строку данных об остатках часов на складе. 
+        list: Список словарей, где каждый словарь представляет одну строку данных об остатках часов на складе.
         Ключи в каждом словаре соответствуют столбцам в скачиваемом .xls файле.
-        
     """
     casio_url = "https://timeworld.ru/upload/files/ostatki.zip"
     session = requests.Session()
@@ -177,29 +183,29 @@ def download_stock():
         keep_default_na=False,
         header=17,
     ).to_dict(orient="records")
-    os.remove("./ostatki.xls") 
+    os.remove("./ostatki.xls")
     return watch_remnants
 
 
 def create_stocks(watch_remnants, offer_ids):
     """Создает массив объектов, содержащих информацию об остатках часов, на основе данных со склада.
-    
+
     Артикулы, отсутствующие в массиве данных со склада, включаются в итоговый массив с нулевым значением остатков.
-        
+
     Args:
-        watch_remnants (list[dict]): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада). 
+        watch_remnants (list): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада).
         Возвращается функцией `download_stock()`.
-        offer_ids (list[str]): Список артикулов всех товаров магазина Ozon.
+        offer_ids (list): Список строковых артикулов всех товаров магазина Ozon.
         Возвращается функцией `get_offer_ids()`.
 
     Returns:
-        list[
+        list: Массив объектов, содержащих информацию об остатках товара.
+        
+        Структура объектов массива:
             dict = {
                 "offer_id": str - Артикул товара в магазине Ozon,
                 "stock": int - Значение остатков,
-            },
-        ]: Массив объектов, содержащих информацию об остатках товара.
-      
+            }
     """
     stocks = []
     for watch in watch_remnants:
@@ -220,25 +226,26 @@ def create_stocks(watch_remnants, offer_ids):
 
 def create_prices(watch_remnants, offer_ids):
     """Создает массив объектов, содержащих информацию о ценах часов, на основе данных со склада.
-    
+
     Значение цены из массива данных со склада форматируется с помощью функции `price_conversion()`.
 
     Args:
-        watch_remnants (list[dict]): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада). 
+        watch_remnants (list): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада).
         Возвращается функцией `download_stock()`.
-        offer_ids (list[str]): Список артикулов всех товаров магазина Ozon.
+        offer_ids (list): Список строковых артикулов всех товаров магазина Ozon.
         Возвращается функцией `get_offer_ids()`.
 
     Returns:
-        list[
+        list: Массив объектов, каждый из которых содержит информацию о стоимости товара.
+        
+        Структура объектов массива:
             dict = {
                 "auto_action_enabled": str - Атрибут Ozon Seller API для включения и выключения автоприменения акций,
                 "currency_code": str - Код валюты,
                 "offer_id": str - Артикул товара,
                 "old_price": str - Цена до скидок в рублях,
                 "price": str - Цена товара с учётом скидок,
-            },
-        ]: Массив объектов, каждый из которых содержит информацию о стоимости товара.
+            }
     """
     prices = []
     for watch in watch_remnants:
@@ -256,7 +263,7 @@ def create_prices(watch_remnants, offer_ids):
 
 def price_conversion(price: str) -> str:
     """Форматирует цену. Пример: 5'990.00 руб. -> 5990
-    
+
     Args:
         price (str): Цена товара из массива данных со склада
 
@@ -267,14 +274,14 @@ def price_conversion(price: str) -> str:
 
 
 def divide(lst: list, n: int):
-    """Создает генератор, отделяющий от списка `lst` части по `n` элементов максимум в каждой.
+    """Создает генератор, отделяющий от списка `lst` части с не более `n` элементов в каждой.
 
     Args:
         lst (list): Список, разбиваемый на части
         n (int): Максимальное число элементов в 1 части
 
     Yields:
-        list: Срез исходного списка, включающий `n` элементов
+        list: Срез исходного списка, включающий не более `n` элементов
     """
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
@@ -282,26 +289,27 @@ def divide(lst: list, n: int):
 
 async def upload_prices(watch_remnants, client_id, seller_token):
     """Асинхронно обновляет цены в магазине Ozon.
-    
+
     Note:
         Не запускается в рамках текущего скрипта.
-    
+
     Args:
-        watch_remnants (list[dict]): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада). 
+        watch_remnants (list): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада).
         Возвращается функцией `download_stock()`.
         client_id (str): Идентификатор клиента (владельца магазина Ozon).
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        list[
+        list: Массив объектов, каждый из которых содержит информацию о стоимости товара.
+        
+        Структура объектов массива:
             dict = {
                 "auto_action_enabled": str - Атрибут Ozon Seller API для включения и выключения автоприменения акций,
                 "currency_code": str - Код валюты,
                 "offer_id": str - Артикул товара,
                 "old_price": str - Цена до скидок в рублях,
                 "price": str - Цена товара с учётом скидок,
-            },
-        ]: Массив объектов, каждый из которых содержит информацию о стоимости товара.
+            }
     """
     offer_ids = get_offer_ids(client_id, seller_token)
     prices = create_prices(watch_remnants, offer_ids)
@@ -312,30 +320,30 @@ async def upload_prices(watch_remnants, client_id, seller_token):
 
 async def upload_stocks(watch_remnants, client_id, seller_token):
     """Асинхронно обновляет данные об остатках товаров в магазине Ozon.
-    
+
     Note:
         Не запускается в рамках текущего скрипта
 
     Args:
-        watch_remnants (list[dict]): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада). 
+        watch_remnants (list): Список словарей, содержащих информацию об остатках часов на складе (массив данных со склада).
         Возвращается функцией `download_stock()`.
         client_id (str): Идентификатор клиента (владельца магазина Ozon).
         seller_token (str): API-ключ владельца магазина Ozon.
 
     Returns:
-        list[
+        list: Фильтрованный массив объектов, содержащих ненулевую информацию об остатках товара.
+        Структура объектов массива:
             dict = {
                 "offer_id": str - Артикул товара в магазине Ozon,
                 "stock": int - Значение остатков,
-            },
-        ]: Фильтрованный массив объектов, содержащих ненулевую информацию об остатках товара
+            }
+        list: Массив объектов, содержащих информацию об остатках товара.
         
-        list[
+        Структура объектов массива:
             dict = {
                 "offer_id": str - Артикул товара в магазине Ozon,
                 "stock": int - Значение остатков,
-            },
-        ]: Массив объектов, содержащих информацию об остатках товара
+            }
     """
     offer_ids = get_offer_ids(client_id, seller_token)
     stocks = create_stocks(watch_remnants, offer_ids)
@@ -348,7 +356,7 @@ async def upload_stocks(watch_remnants, client_id, seller_token):
 def main():
     """Выполняет основную логику приложения.
     Обновляет данные об остатках товаров и их стоимости в магазине Ozon.
-    """    
+    """
     env = Env()
     seller_token = env.str("SELLER_TOKEN")
     client_id = env.str("CLIENT_ID")
